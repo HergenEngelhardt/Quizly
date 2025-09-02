@@ -20,6 +20,63 @@ from quiz_app.utils import (
 )
 
 
+def validate_quiz_creation_data(request):
+    """
+    Validate request data for quiz creation.
+    """
+    serializer = QuizCreateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return None, Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    return serializer.validated_data['url'], None
+
+
+def process_video_transcription(url):
+    """
+    Process video URL to transcript.
+    """
+    video_info = get_video_info(url)
+    audio_file = download_youtube_audio(url)
+    
+    try:
+        transcript = transcribe_audio(audio_file)
+        return transcript, audio_file, video_info
+    except Exception:
+        cleanup_temp_file(audio_file)
+        raise
+
+
+def create_quiz_from_data(user, url, quiz_data, video_info):
+    """
+    Create quiz object from processed data.
+    """
+    quiz = Quiz.objects.create(
+        title=quiz_data.get('title', video_info.get('title', 'Untitled Quiz')),
+        description=quiz_data.get('description', ''),
+        video_url=url,
+        user=user
+    )
+    
+    for question_data in quiz_data['questions']:
+        Question.objects.create(
+            quiz=quiz,
+            question_title=question_data['question_title'],
+            question_options=question_data['question_options'],
+            answer=question_data['answer']
+        )
+    
+    return quiz
+
+
+def cleanup_quiz_creation(audio_file_path):
+    """
+    Cleanup temporary files after quiz creation.
+    """
+    cleanup_temp_file(audio_file_path)
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_quiz_view(request):
@@ -27,50 +84,19 @@ def create_quiz_view(request):
     Create a new quiz from YouTube URL.
     """
     try:
-        serializer = QuizCreateSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        url, error_response = validate_quiz_creation_data(request)
+        if error_response:
+            return error_response
             
-        url = serializer.validated_data['url']
-        user = request.user
-        
-        # Get video info
-        video_info = get_video_info(url)
-        
-        # Download audio
-        audio_file = download_youtube_audio(url)
+        transcript, audio_file, video_info = process_video_transcription(url)
         
         try:
-            # Transcribe audio
-            transcript = transcribe_audio(audio_file)
-            
-            # Generate quiz
             quiz_data = generate_quiz_from_transcript(
                 transcript, 
                 video_info.get('title', '')
             )
             
-            # Create quiz
-            quiz = Quiz.objects.create(
-                title=quiz_data.get('title', video_info.get('title', 'Untitled Quiz')),
-                description=quiz_data.get('description', ''),
-                video_url=url,
-                user=user
-            )
-            
-            # Create questions
-            for question_data in quiz_data['questions']:
-                Question.objects.create(
-                    quiz=quiz,
-                    question_title=question_data['question_title'],
-                    question_options=question_data['question_options'],
-                    answer=question_data['answer']
-                )
-            
-            # Serialize response
+            quiz = create_quiz_from_data(request.user, url, quiz_data, video_info)
             response_serializer = QuizSerializer(quiz)
             
             return Response(
@@ -79,8 +105,7 @@ def create_quiz_view(request):
             )
             
         finally:
-            # Clean up temporary audio file
-            cleanup_temp_file(audio_file)
+            cleanup_quiz_creation(audio_file)
             
     except Exception as e:
         return Response(
