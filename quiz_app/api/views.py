@@ -76,6 +76,20 @@ def cleanup_quiz_creation(audio_file_path):
     cleanup_temp_file(audio_file_path)
 
 
+def handle_quiz_creation(user, url):
+    """
+    Handle the complete quiz creation process.
+    """
+    transcript, audio_file, video_info = process_video_transcription(url)
+    try:
+        quiz_data = generate_quiz_from_transcript(
+            transcript, video_info.get("title", "")
+        )
+        return create_quiz_from_data(user, url, quiz_data, video_info)
+    finally:
+        cleanup_quiz_creation(audio_file)
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_quiz_view(request):
@@ -87,20 +101,9 @@ def create_quiz_view(request):
         if error_response:
             return error_response
 
-        transcript, audio_file, video_info = process_video_transcription(url)
-
-        try:
-            quiz_data = generate_quiz_from_transcript(
-                transcript, video_info.get("title", "")
-            )
-
-            quiz = create_quiz_from_data(request.user, url, quiz_data, video_info)
-            response_serializer = QuizSerializer(quiz)
-
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-
-        finally:
-            cleanup_quiz_creation(audio_file)
+        quiz = handle_quiz_creation(request.user, url)
+        response_serializer = QuizSerializer(quiz)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     except Exception as e:
         return Response(
@@ -128,6 +131,24 @@ def list_quizzes_view(request):
         )
 
 
+def validate_quiz_access(quiz_id, user):
+    """
+    Validate quiz access and return quiz or error response.
+    """
+    try:
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+    except Quiz.DoesNotExist:
+        return None, Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    if quiz.user != user:
+        return None, Response(
+            {"detail": "Access denied - Quiz does not belong to user."}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    return quiz, None
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_quiz_view(request, quiz_id):
@@ -135,18 +156,9 @@ def get_quiz_view(request, quiz_id):
     Get specific quiz for authenticated user.
     """
     try:
-        # First check if quiz exists at all
-        try:
-            quiz = get_object_or_404(Quiz, id=quiz_id)
-        except Quiz.DoesNotExist:
-            return Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Then check if user owns the quiz
-        if quiz.user != request.user:
-            return Response(
-                {"detail": "Access denied - Quiz does not belong to user."}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+        quiz, error_response = validate_quiz_access(quiz_id, request.user)
+        if error_response:
+            return error_response
         
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -158,6 +170,19 @@ def get_quiz_view(request, quiz_id):
         )
 
 
+def handle_quiz_update(quiz, request_data, partial=False):
+    """
+    Handle quiz update logic.
+    """
+    serializer = QuizUpdateSerializer(quiz, data=request_data, partial=partial)
+    if serializer.is_valid():
+        serializer.save()
+        response_serializer = QuizSerializer(quiz)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated])
 def update_quiz_view(request, quiz_id):
@@ -165,27 +190,11 @@ def update_quiz_view(request, quiz_id):
     Update quiz (full update).
     """
     try:
-        # First check if quiz exists at all
-        try:
-            quiz = get_object_or_404(Quiz, id=quiz_id)
-        except Quiz.DoesNotExist:
-            return Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Then check if user owns the quiz
-        if quiz.user != request.user:
-            return Response(
-                {"detail": "Access denied - Quiz does not belong to user."}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+        quiz, error_response = validate_quiz_access(quiz_id, request.user)
+        if error_response:
+            return error_response
 
-        serializer = QuizUpdateSerializer(quiz, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            response_serializer = QuizSerializer(quiz)
-
-            return Response(response_serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return handle_quiz_update(quiz, request.data, partial=False)
 
     except Exception:
         return Response(
@@ -201,29 +210,17 @@ def partial_update_quiz_view(request, quiz_id):
     Partially update quiz.
     """
     try:
-        # First check if quiz exists at all
-        try:
-            quiz = get_object_or_404(Quiz, id=quiz_id)
-        except Quiz.DoesNotExist:
-            return Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Then check if user owns the quiz
-        if quiz.user != request.user:
-            return Response(
-                {"detail": "Access denied - Quiz does not belong to user."}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+        quiz, error_response = validate_quiz_access(quiz_id, request.user)
+        if error_response:
+            return error_response
 
-        serializer = QuizUpdateSerializer(quiz, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            response_serializer = QuizSerializer(quiz)
-
-            return Response(response_serializer.data, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return handle_quiz_update(quiz, request.data, partial=True)
 
     except Exception:
+        return Response(
+            {"detail": "Internal server error."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
         return Response(
             {"detail": "Internal server error."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -237,18 +234,9 @@ def delete_quiz_view(request, quiz_id):
     Delete quiz permanently.
     """
     try:
-        # First check if quiz exists at all
-        try:
-            quiz = get_object_or_404(Quiz, id=quiz_id)
-        except Quiz.DoesNotExist:
-            return Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Then check if user owns the quiz
-        if quiz.user != request.user:
-            return Response(
-                {"detail": "Access denied - Quiz does not belong to user."}, 
-                status=status.HTTP_403_FORBIDDEN
-            )
+        quiz, error_response = validate_quiz_access(quiz_id, request.user)
+        if error_response:
+            return error_response
         
         quiz.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)

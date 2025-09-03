@@ -107,6 +107,23 @@ def save_quiz_answer_view(request, attempt_id):
         )
 
 
+def calculate_quiz_score(attempt):
+    """
+    Calculate quiz score based on user answers.
+    """
+    questions = attempt.quiz.questions.all()
+    correct_answers = 0
+    total_questions = questions.count()
+
+    for question in questions:
+        user_answer = attempt.answers.get(str(question.id))
+        if user_answer == question.answer:
+            correct_answers += 1
+
+    score = (correct_answers / total_questions * 100) if total_questions > 0 else 0
+    return score, correct_answers, total_questions
+
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def complete_quiz_view(request, attempt_id):
@@ -122,17 +139,7 @@ def complete_quiz_view(request, attempt_id):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Calculate score
-        questions = attempt.quiz.questions.all()
-        correct_answers = 0
-        total_questions = questions.count()
-
-        for question in questions:
-            user_answer = attempt.answers.get(str(question.id))
-            if user_answer == question.answer:
-                correct_answers += 1
-
-        score = (correct_answers / total_questions * 100) if total_questions > 0 else 0
+        score, correct_answers, total_questions = calculate_quiz_score(attempt)
 
         # Update attempt
         attempt.score = score
