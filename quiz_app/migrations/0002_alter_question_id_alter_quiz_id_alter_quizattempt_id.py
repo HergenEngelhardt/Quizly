@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('quiz_app', '0001_initial'),
+        ("quiz_app", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='question',
-            name='id',
+            model_name="question",
+            name="id",
             field=models.AutoField(primary_key=True, serialize=False),
         ),
         migrations.AlterField(
-            model_name='quiz',
-            name='id',
+            model_name="quiz",
+            name="id",
             field=models.AutoField(primary_key=True, serialize=False),
         ),
         migrations.AlterField(
-            model_name='quizattempt',
-            name='id',
+            model_name="quizattempt",
+            name="id",
             field=models.AutoField(primary_key=True, serialize=False),
         ),
     ]

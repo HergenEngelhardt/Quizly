@@ -138,14 +138,16 @@ def validate_quiz_access(quiz_id, user):
     try:
         quiz = get_object_or_404(Quiz, id=quiz_id)
     except Quiz.DoesNotExist:
-        return None, Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
-    
+        return None, Response(
+            {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
+        )
+
     if quiz.user != user:
         return None, Response(
-            {"detail": "Access denied - Quiz does not belong to user."}, 
-            status=status.HTTP_403_FORBIDDEN
+            {"detail": "Access denied - Quiz does not belong to user."},
+            status=status.HTTP_403_FORBIDDEN,
         )
-    
+
     return quiz, None
 
 
@@ -159,7 +161,7 @@ def get_quiz_view(request, quiz_id):
         quiz, error_response = validate_quiz_access(quiz_id, request.user)
         if error_response:
             return error_response
-        
+
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -179,7 +181,7 @@ def handle_quiz_update(quiz, request_data, partial=False):
         serializer.save()
         response_serializer = QuizSerializer(quiz)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
-    
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -237,7 +239,7 @@ def delete_quiz_view(request, quiz_id):
         quiz, error_response = validate_quiz_access(quiz_id, request.user)
         if error_response:
             return error_response
-        
+
         quiz.delete()
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 

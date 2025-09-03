@@ -1,6 +1,7 @@
 """
 Class-based views for Quiz API.
 """
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ class QuizDetailView(APIView):
     """
     REST API view for quiz detail operations (GET, PUT, PATCH, DELETE).
     """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, quiz_id):
@@ -26,14 +28,14 @@ class QuizDetailView(APIView):
                 return Response(
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
-                    {"detail": "Access denied - Quiz does not belong to user."}, 
-                    status=status.HTTP_403_FORBIDDEN
+                    {"detail": "Access denied - Quiz does not belong to user."},
+                    status=status.HTTP_403_FORBIDDEN,
                 )
-            
+
             serializer = QuizSerializer(quiz)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception:
@@ -51,14 +53,14 @@ class QuizDetailView(APIView):
                 return Response(
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
-                    {"detail": "Access denied - Quiz does not belong to user."}, 
-                    status=status.HTTP_403_FORBIDDEN
+                    {"detail": "Access denied - Quiz does not belong to user."},
+                    status=status.HTTP_403_FORBIDDEN,
                 )
-            
+
             serializer = QuizUpdateSerializer(quiz, data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -80,14 +82,14 @@ class QuizDetailView(APIView):
                 return Response(
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
-                    {"detail": "Access denied - Quiz does not belong to user."}, 
-                    status=status.HTTP_403_FORBIDDEN
+                    {"detail": "Access denied - Quiz does not belong to user."},
+                    status=status.HTTP_403_FORBIDDEN,
                 )
-            
+
             serializer = QuizUpdateSerializer(quiz, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
@@ -109,14 +111,14 @@ class QuizDetailView(APIView):
                 return Response(
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
-            
+
             # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
-                    {"detail": "Access denied - Quiz does not belong to user."}, 
-                    status=status.HTTP_403_FORBIDDEN
+                    {"detail": "Access denied - Quiz does not belong to user."},
+                    status=status.HTTP_403_FORBIDDEN,
                 )
-            
+
             quiz.delete()
             return Response(None, status=status.HTTP_204_NO_CONTENT)
         except Exception:
