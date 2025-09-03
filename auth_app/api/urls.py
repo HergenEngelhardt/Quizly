@@ -1,5 +1,5 @@
 """
-URL configuration for authentication API.
+Simple URL configuration for authentication API.
 """
 
 from django.urls import path

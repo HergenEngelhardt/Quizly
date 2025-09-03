@@ -1,26 +1,38 @@
 """
-Custom JWT authentication using HTTP-only cookies.
+Simple JWT authentication using HTTP cookies.
 """
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 
 class JWTCookieAuthentication(JWTAuthentication):
     """
-    Custom JWT authentication that reads tokens from HTTP-only cookies.
+    JWT authentication that reads tokens from cookies.
+
+    Extends the default JWT authentication to work with HTTP-only cookies
+    instead of Authorization headers.
     """
 
     def authenticate(self, request):
         """
         Authenticate user using JWT token from cookies.
+
+        Args:
+            request: HTTP request object
+
+        Returns:
+            tuple: (user, token) if authentication successful, None otherwise
+
+        Raises:
+            None
         """
         header = self.get_header(request)
         if header is not None:
             raw_token = self.get_raw_token(header)
         else:
-            # Try to get token from cookies
             raw_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_COOKIE"])
 
         if raw_token is None:
@@ -35,16 +47,23 @@ class JWTCookieAuthentication(JWTAuthentication):
 
     def get_user(self, validated_token):
         """
-        Get user from validated token.
+        Get user from validated JWT token.
+
+        Args:
+            validated_token: Validated JWT token object
+
+        Returns:
+            User: Django user object
+
+        Raises:
+            InvalidToken: If token is invalid or user not found
         """
         try:
             user_id = validated_token.get("user_id")
         except KeyError:
-            raise InvalidToken("Token contained no recognizable user identification")
+            raise InvalidToken("Token missing user identification")
 
         try:
-            from django.contrib.auth import get_user_model
-
             User = get_user_model()
             user = User.objects.get(**{User.USERNAME_FIELD: user_id})
         except User.DoesNotExist:

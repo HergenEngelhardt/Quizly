@@ -1,5 +1,5 @@
 """
-Serializers for authentication endpoints.
+Simple serializers for user authentication.
 """
 
 from rest_framework import serializers
@@ -10,7 +10,9 @@ from django.contrib.auth import authenticate
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
-    Serializer for user registration.
+    Serializer for creating new user accounts.
+
+    Validates username, email uniqueness and password strength.
     """
 
     password = serializers.CharField(write_only=True, validators=[validate_password])
@@ -21,25 +23,50 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         """
-        Validate email uniqueness.
+        Check if email already exists.
+
+        Args:
+            value (str): Email address to validate
+
+        Returns:
+            str: Validated email address
+
+        Raises:
+            ValidationError: If email already exists
         """
         if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("A user with this email already exists.")
+            raise serializers.ValidationError("Email already exists.")
         return value
 
     def validate_username(self, value):
         """
-        Validate username uniqueness.
+        Check if username already exists.
+
+        Args:
+            value (str): Username to validate
+
+        Returns:
+            str: Validated username
+
+        Raises:
+            ValidationError: If username already exists
         """
         if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError(
-                "A user with this username already exists."
-            )
+            raise serializers.ValidationError("Username already exists.")
         return value
 
     def create(self, validated_data):
         """
-        Create new user with encrypted password.
+        Create new user with hashed password.
+
+        Args:
+            validated_data (dict): Validated user data
+
+        Returns:
+            User: Created user object
+
+        Raises:
+            None
         """
         password = validated_data.pop("password")
         user = User.objects.create(**validated_data)
@@ -50,7 +77,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 class UserLoginSerializer(serializers.Serializer):
     """
-    Serializer for user login.
+    Serializer for user login authentication.
+
+    Validates username and password credentials.
     """
 
     username = serializers.CharField()
@@ -58,27 +87,38 @@ class UserLoginSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         """
-        Validate user credentials.
+        Validate user login credentials.
+
+        Args:
+            attrs (dict): Username and password data
+
+        Returns:
+            dict: Validated data with authenticated user
+
+        Raises:
+            ValidationError: If credentials are invalid or user is inactive
         """
         username = attrs.get("username")
         password = attrs.get("password")
 
-        if username and password:
-            user = authenticate(username=username, password=password)
-            if not user:
-                raise serializers.ValidationError("Invalid login credentials.")
-            if not user.is_active:
-                raise serializers.ValidationError("User account is disabled.")
-            attrs["user"] = user
-        else:
-            raise serializers.ValidationError("Must include username and password.")
+        if not username or not password:
+            raise serializers.ValidationError("Username and password required.")
 
+        user = authenticate(username=username, password=password)
+        if not user:
+            raise serializers.ValidationError("Invalid credentials.")
+        if not user.is_active:
+            raise serializers.ValidationError("Account is disabled.")
+        
+        attrs["user"] = user
         return attrs
 
 
 class UserSerializer(serializers.ModelSerializer):
     """
-    Serializer for user data in responses.
+    Serializer for user data in API responses.
+
+    Returns basic user information without sensitive data.
     """
 
     class Meta:

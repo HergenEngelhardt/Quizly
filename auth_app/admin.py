@@ -6,32 +6,39 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-# Customize the default User admin
 admin.site.unregister(User)
 
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
     """
-    Custom User admin with additional information.
+    Simple user admin interface.
+
+    Extends the default Django UserAdmin to show basic user information
+    with an additional quiz count field.
     """
 
     list_display = [
         "username",
-        "email",
+        "email", 
         "first_name",
         "last_name",
         "is_staff",
         "date_joined",
         "quiz_count",
     ]
-    list_filter = ["is_staff", "is_superuser", "is_active", "date_joined"]
-    search_fields = ["username", "email", "first_name", "last_name"]
-    ordering = ["-date_joined"]
+    list_filter = ["is_staff", "is_active", "date_joined"]
+    search_fields = ["username", "email"]
 
     def quiz_count(self, obj):
         """
-        Display number of quizzes created by user.
+        Count quizzes for a user.
+
+        Args:
+            obj: User object to count quizzes for
+
+        Returns:
+            int: Number of quizzes created by the user
         """
         return obj.quizzes.count()
 

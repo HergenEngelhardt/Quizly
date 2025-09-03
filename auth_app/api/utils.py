@@ -1,15 +1,23 @@
 """
-Utility functions for authentication.
+Simple utility functions for JWT authentication.
 """
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.conf import settings
-from quiz_app.models import BlacklistedToken
 
 
 def get_tokens_for_user(user):
     """
-    Generate JWT tokens for user.
+    Create JWT tokens for a user.
+
+    Args:
+        user: Django user object
+
+    Returns:
+        dict: Dictionary with access and refresh tokens
+
+    Raises:
+        None
     """
     refresh = RefreshToken.for_user(user)
     return {
@@ -20,12 +28,21 @@ def get_tokens_for_user(user):
 
 def set_jwt_cookies(response, tokens):
     """
-    Set JWT tokens as HTTP-only cookies.
+    Add JWT tokens to HTTP response as cookies.
+
+    Args:
+        response: Django HTTP response object
+        tokens (dict): Dictionary with access and refresh tokens
+
+    Returns:
+        HttpResponse: Response with JWT cookies set
+
+    Raises:
+        None
     """
     access_token = tokens["access"]
     refresh_token = tokens["refresh"]
 
-    # Set access token cookie
     response.set_cookie(
         "access_token",
         access_token,
@@ -35,7 +52,6 @@ def set_jwt_cookies(response, tokens):
         samesite="Lax",
     )
 
-    # Set refresh token cookie
     response.set_cookie(
         "refresh_token",
         refresh_token,
@@ -50,26 +66,17 @@ def set_jwt_cookies(response, tokens):
 
 def clear_jwt_cookies(response):
     """
-    Clear JWT cookies from response.
+    Remove JWT cookies from HTTP response.
+
+    Args:
+        response: Django HTTP response object
+
+    Returns:
+        HttpResponse: Response with cleared JWT cookies
+
+    Raises:
+        None
     """
     response.delete_cookie("access_token")
     response.delete_cookie("refresh_token")
     return response
-
-
-def blacklist_token(token):
-    """
-    Add token to blacklist.
-    """
-    try:
-        BlacklistedToken.objects.create(token=str(token))
-        return True
-    except Exception:
-        return False
-
-
-def is_token_blacklisted(token):
-    """
-    Check if token is blacklisted.
-    """
-    return BlacklistedToken.objects.filter(token=str(token)).exists()
