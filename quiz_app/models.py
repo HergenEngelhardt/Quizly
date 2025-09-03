@@ -5,7 +5,6 @@ Quiz app models for Quizly application.
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import URLValidator
-import uuid
 
 
 class Quiz(models.Model):
@@ -13,7 +12,8 @@ class Quiz(models.Model):
     Quiz model representing a quiz created from YouTube video.
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Using AutoField for integer primary keys as per API documentation
+    id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     video_url = models.URLField(validators=[URLValidator()])
@@ -35,7 +35,8 @@ class Question(models.Model):
     Question model representing individual quiz questions.
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Using AutoField for integer primary keys as per API documentation
+    id = models.AutoField(primary_key=True)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
     question_title = models.TextField()
     question_options = models.JSONField(default=list)  # Array of 4 options
@@ -57,7 +58,8 @@ class QuizAttempt(models.Model):
     Quiz attempt model for tracking user quiz sessions.
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Using AutoField for integer primary keys
+    id = models.AutoField(primary_key=True)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="quiz_attempts"

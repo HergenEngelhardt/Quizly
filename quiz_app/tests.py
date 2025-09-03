@@ -73,9 +73,8 @@ class QuizTestCase(TestCase):
         """
         Test quiz retrieval with invalid ID.
         """
-        from uuid import uuid4
-
-        url = self.quiz_detail_url(uuid4())
+        # Use non-existent integer ID instead of UUID
+        url = self.quiz_detail_url(99999)
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
