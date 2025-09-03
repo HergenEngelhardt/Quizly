@@ -17,68 +17,138 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='BlacklistedToken',
+            name="BlacklistedToken",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.TextField(unique=True)),
-                ('blacklisted_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("token", models.TextField(unique=True)),
+                ("blacklisted_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Blacklisted Token',
-                'verbose_name_plural': 'Blacklisted Tokens',
-                'indexes': [models.Index(fields=['token'], name='quiz_app_bl_token_335587_idx')],
+                "verbose_name": "Blacklisted Token",
+                "verbose_name_plural": "Blacklisted Tokens",
+                "indexes": [
+                    models.Index(fields=["token"], name="quiz_app_bl_token_335587_idx")
+                ],
             },
         ),
         migrations.CreateModel(
-            name='Quiz',
+            name="Quiz",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('title', models.CharField(blank=True, max_length=255)),
-                ('description', models.TextField(blank=True)),
-                ('video_url', models.URLField(validators=[django.core.validators.URLValidator()])),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quizzes', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("title", models.CharField(blank=True, max_length=255)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "video_url",
+                    models.URLField(validators=[django.core.validators.URLValidator()]),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="quizzes",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Quiz',
-                'verbose_name_plural': 'Quizzes',
-                'ordering': ['-created_at'],
+                "verbose_name": "Quiz",
+                "verbose_name_plural": "Quizzes",
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Question',
+            name="Question",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('question_title', models.TextField()),
-                ('question_options', models.JSONField(default=list)),
-                ('answer', models.CharField(max_length=500)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('quiz', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='questions', to='quiz_app.quiz')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("question_title", models.TextField()),
+                ("question_options", models.JSONField(default=list)),
+                ("answer", models.CharField(max_length=500)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "quiz",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="questions",
+                        to="quiz_app.quiz",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Question',
-                'verbose_name_plural': 'Questions',
-                'ordering': ['created_at'],
+                "verbose_name": "Question",
+                "verbose_name_plural": "Questions",
+                "ordering": ["created_at"],
             },
         ),
         migrations.CreateModel(
-            name='QuizAttempt',
+            name="QuizAttempt",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('answers', models.JSONField(default=dict)),
-                ('score', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('quiz', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attempts', to='quiz_app.quiz')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='quiz_attempts', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("answers", models.JSONField(default=dict)),
+                (
+                    "score",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "quiz",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attempts",
+                        to="quiz_app.quiz",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="quiz_attempts",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Quiz Attempt',
-                'verbose_name_plural': 'Quiz Attempts',
-                'ordering': ['-created_at'],
+                "verbose_name": "Quiz Attempt",
+                "verbose_name_plural": "Quiz Attempts",
+                "ordering": ["-created_at"],
             },
         ),
     ]
