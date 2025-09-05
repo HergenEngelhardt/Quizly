@@ -1,4 +1,4 @@
-"""
+﻿"""
 Comprehensive tests for quiz API endpoints.
 """
 
@@ -361,19 +361,16 @@ class ViewHelpersTestCase(TestCase):
         self.assertIsNone(quiz)
 
     def test_view_helper_functions(self):
-        """Test individual view helper functions."""
+        "Test individual view helper functions."
         from quiz_app.utils import validate_quiz_creation_data, cleanup_quiz_creation
-        from rest_framework.test import APIRequestFactory
-
-        factory = APIRequestFactory()
-
-        # Test validate_quiz_creation_data with proper request.data
-        request = factory.post('/', {"url": "https://youtube.com/watch?v=test"}, format='json')
-        request.data = {"url": "https://youtube.com/watch?v=test"}
-        url, error = validate_quiz_creation_data(request)
+        from quiz_app.api.serializers import QuizCreateSerializer
+        
+        # Test validate_quiz_creation_data with proper serializer
+        serializer = QuizCreateSerializer(data={"url": "https://youtube.com/watch?v=test"})
+        url, error = validate_quiz_creation_data(serializer)
         self.assertIsNotNone(url)
         self.assertIsNone(error)
-
+        
         # Test cleanup_quiz_creation
         cleanup_quiz_creation(None)  # Should not raise exception
         cleanup_quiz_creation("/tmp/test.wav")  # Should not raise exception
