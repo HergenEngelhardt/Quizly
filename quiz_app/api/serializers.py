@@ -61,7 +61,7 @@ class QuizListSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
-            "description", 
+            "description",
             "created_at",
             "video_url",
         ]

@@ -84,7 +84,9 @@ class AuthTestCase(TestCase):
 
         response = self.client.post(reverse("token_refresh"))
         # Token refresh can return 200 or 401 depending on cookie state
-        self.assertIn(response.status_code, [status.HTTP_200_OK, status.HTTP_401_UNAUTHORIZED])
+        self.assertIn(
+            response.status_code, [status.HTTP_200_OK, status.HTTP_401_UNAUTHORIZED]
+        )
 
     def test_token_refresh_invalid_token(self):
         """Test token refresh with invalid token."""
@@ -103,7 +105,9 @@ class BlacklistedTokenTestCase(TestCase):
     def test_blacklist_token_creation(self):
         """Test blacklisted token creation."""
         blacklisted = BlacklistedToken.objects.create(token=self.token)
-        self.assertEqual(str(blacklisted), f"Blacklisted token - {blacklisted.blacklisted_at}")
+        self.assertEqual(
+            str(blacklisted), f"Blacklisted token - {blacklisted.blacklisted_at}"
+        )
         self.assertTrue(BlacklistedToken.objects.filter(token=self.token).exists())
 
     def test_get_tokens_for_user(self):

@@ -362,7 +362,7 @@ class ViewHelpersTestCase(TestCase):
 
     def test_view_helper_functions(self):
         """Test individual view helper functions."""
-        from .api.views import validate_quiz_creation_data, cleanup_quiz_creation
+        from quiz_app.utils import validate_quiz_creation_data, cleanup_quiz_creation
         from rest_framework.test import APIRequestFactory
 
         factory = APIRequestFactory()

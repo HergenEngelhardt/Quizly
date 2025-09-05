@@ -72,7 +72,9 @@ class QuizAttempt(models.Model):
 
     id = models.AutoField(primary_key=True)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quiz_attempts")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="quiz_attempts"
+    )
     answers = models.JSONField(default=dict)
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)

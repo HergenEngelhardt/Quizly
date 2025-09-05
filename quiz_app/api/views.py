@@ -19,92 +19,26 @@ from .serializers import (
     QuizAttemptSerializer,
 )
 from quiz_app.utils import (
-    download_youtube_audio,
-    transcribe_audio,
-    generate_quiz_from_transcript,
-    cleanup_temp_file,
-    get_video_info,
+    handle_quiz_creation,
+    validate_quiz_creation_data,
 )
-
-
-def validate_quiz_creation_data(request):
-    """
-    Validate request data for quiz creation.
-    """
-    serializer = QuizCreateSerializer(data=request.data)
-    if not serializer.is_valid():
-        return None, Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return serializer.validated_data["url"], None
-
-
-def process_video_transcription(url):
-    """
-    Process video URL to transcript.
-    """
-    audio_file_path = download_youtube_audio(url)
-    transcript = transcribe_audio(audio_file_path)
-    return audio_file_path, transcript
-
-
-def create_quiz_from_data(user, url, quiz_data, video_info):
-    """
-    Create quiz object from processed data.
-    """
-    quiz = Quiz.objects.create(
-        user=user,
-        title=quiz_data.get("title", video_info.get("title", "Untitled Quiz")),
-        description=quiz_data.get("description", "Auto-generated quiz"),
-        video_url=url,
-    )
-
-    for question_data in quiz_data["questions"]:
-        Question.objects.create(
-            quiz=quiz,
-            question_title=question_data["question_title"],
-            question_options=question_data["question_options"],
-            answer=question_data["answer"],
-        )
-    return quiz
-
-
-def cleanup_quiz_creation(audio_file_path):
-    """
-    Cleanup temporary files after quiz creation.
-    """
-    if audio_file_path:
-        cleanup_temp_file(audio_file_path)
-
-
-def handle_quiz_creation(user, url):
-    """
-    Handle the complete quiz creation process.
-    """
-    audio_file_path = None
-    try:
-        video_info = get_video_info(url)
-        audio_file_path, transcript = process_video_transcription(url)
-        quiz_data = generate_quiz_from_transcript(transcript, video_info.get("title", ""))
-        quiz = create_quiz_from_data(user, url, quiz_data, video_info)
-        return quiz
-    finally:
-        cleanup_quiz_creation(audio_file_path)
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_quiz_view(request):
-    """
-    Create a new quiz from YouTube URL.
-    """
+    """Create a new quiz from YouTube URL."""
     try:
-        url, error_response = validate_quiz_creation_data(request)
-        if error_response:
-            return error_response
-
+        serializer = QuizCreateSerializer(data=request.data)
+        url, error = validate_quiz_creation_data(serializer)
+        
+        if error:
+            return Response(error, status=status.HTTP_400_BAD_REQUEST)
+            
         quiz = handle_quiz_creation(request.user, url)
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        
     except Exception as e:
         return Response(
             {"detail": f"Error creating quiz: {str(e)}"},
@@ -143,7 +77,9 @@ class QuizDetailView(APIView):
         try:
             quiz = Quiz.objects.get(id=quiz_id)
         except Quiz.DoesNotExist:
-            return None, Response({"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND)
+            return None, Response(
+                {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
+            )
 
         if quiz.user != user:
             return None, Response(
@@ -196,6 +132,7 @@ class QuizDetailView(APIView):
 
 
 # Additional endpoints for User Stories 7-10
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -259,9 +196,13 @@ def save_quiz_answer_view(request, attempt_id):
 
         attempt.answers[str(question_id)] = answer
         attempt.save()
-        return Response({"detail": "Answer saved successfully."}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Answer saved successfully."}, status=status.HTTP_200_OK
+        )
     except QuizAttempt.DoesNotExist:
-        return Response({"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND
+        )
     except Exception:
         return Response(
             {"detail": "Internal server error."},
@@ -273,15 +214,15 @@ def calculate_quiz_score(attempt):
     """Calculate quiz score percentage."""
     if not attempt.answers:
         return 0.0
-    
+
     correct_answers = 0
     total_questions = attempt.quiz.questions.count()
-    
+
     for question in attempt.quiz.questions.all():
         user_answer = attempt.answers.get(str(question.id))
         if user_answer == question.answer:
             correct_answers += 1
-    
+
     return (correct_answers / total_questions * 100) if total_questions > 0 else 0.0
 
 
@@ -291,25 +232,30 @@ def complete_quiz_view(request, attempt_id):
     """Complete quiz and calculate score (User Story 9)."""
     try:
         attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
-        
+
         if attempt.completed_at:
             return Response(
-                {"detail": "Quiz already completed."}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Quiz already completed."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         score = calculate_quiz_score(attempt)
         attempt.score = score
         attempt.completed_at = timezone.now()
         attempt.save()
-        
-        return Response({
-            "detail": "Quiz completed successfully.",
-            "score": score,
-            "percentage": f"{score:.1f}%"
-        }, status=status.HTTP_200_OK)
+
+        return Response(
+            {
+                "detail": "Quiz completed successfully.",
+                "score": score,
+                "percentage": f"{score:.1f}%",
+            },
+            status=status.HTTP_200_OK,
+        )
     except QuizAttempt.DoesNotExist:
-        return Response({"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND
+        )
     except Exception:
         return Response(
             {"detail": "Internal server error."},
@@ -323,32 +269,39 @@ def get_quiz_results_view(request, attempt_id):
     """Get quiz results with answers comparison (User Story 9)."""
     try:
         attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
-        
+
         if not attempt.completed_at:
             return Response(
-                {"detail": "Quiz not completed yet."}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Quiz not completed yet."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         questions_with_answers = []
         for question in attempt.quiz.questions.all():
             user_answer = attempt.answers.get(str(question.id))
-            questions_with_answers.append({
-                "question": question.question_title,
-                "options": question.question_options,
-                "correct_answer": question.answer,
-                "user_answer": user_answer,
-                "is_correct": user_answer == question.answer
-            })
-        
-        return Response({
-            "quiz_title": attempt.quiz.title,
-            "score": attempt.score,
-            "completed_at": attempt.completed_at,
-            "questions_with_answers": questions_with_answers
-        }, status=status.HTTP_200_OK)
+            questions_with_answers.append(
+                {
+                    "question": question.question_title,
+                    "options": question.question_options,
+                    "correct_answer": question.answer,
+                    "user_answer": user_answer,
+                    "is_correct": user_answer == question.answer,
+                }
+            )
+
+        return Response(
+            {
+                "quiz_title": attempt.quiz.title,
+                "score": attempt.score,
+                "completed_at": attempt.completed_at,
+                "questions_with_answers": questions_with_answers,
+            },
+            status=status.HTTP_200_OK,
+        )
     except QuizAttempt.DoesNotExist:
-        return Response({"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND
+        )
     except Exception:
         return Response(
             {"detail": "Internal server error."},
@@ -360,9 +313,10 @@ def get_quiz_results_view(request, attempt_id):
 @permission_classes([AllowAny])
 def privacy_policy_view(request):
     """Privacy policy endpoint (User Story 10)."""
-    return Response({
-        "title": "Datenschutzerklärung",
-        "content": """
+    return Response(
+        {
+            "title": "Datenschutzerklärung",
+            "content": """
         Diese Datenschutzerklärung erklärt, wie Quizly Ihre persönlichen Daten sammelt und verwendet.
         
         1. Datensammlung:
@@ -382,17 +336,19 @@ def privacy_policy_view(request):
         
         Kontakt: [HIER IHRE KONTAKTDATEN EINFÜGEN]
         Stand: September 2025
-        """
-    })
+        """,
+        }
+    )
 
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def legal_notice_view(request):
     """Legal notice endpoint (User Story 10)."""
-    return Response({
-        "title": "Impressum",
-        "content": """
+    return Response(
+        {
+            "title": "Impressum",
+            "content": """
         Angaben gemäß § 5 TMG:
         
         [HIER IHRE DATEN EINFÜGEN]
@@ -410,5 +366,6 @@ def legal_notice_view(request):
         Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
         
         Stand: September 2025
-        """
-    })
+        """,
+        }
+    )
