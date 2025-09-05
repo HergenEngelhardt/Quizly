@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from auth_app.utils import is_token_blacklisted
 
 
 class JWTCookieAuthentication(JWTAuthentication):
@@ -36,6 +37,10 @@ class JWTCookieAuthentication(JWTAuthentication):
             raw_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_COOKIE"])
 
         if raw_token is None:
+            return None
+
+        # Check if token is blacklisted
+        if is_token_blacklisted(raw_token):
             return None
 
         try:

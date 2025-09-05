@@ -109,7 +109,7 @@ class UserLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid credentials.")
         if not user.is_active:
             raise serializers.ValidationError("Account is disabled.")
-        
+
         attrs["user"] = user
         return attrs
 

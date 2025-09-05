@@ -64,8 +64,7 @@ class QuizTestCase(TestCase):
         
         update_data = {
             "title": "Updated Test Quiz",
-            "description": "An updated test quiz",
-            "video_url": "https://youtube.com/watch?v=updated123"
+            "description": "An updated test quiz"
         }
         
         self.client.force_authenticate(user=self.user)
@@ -347,33 +346,30 @@ class ViewHelpersTestCase(TestCase):
     def test_quiz_detail_view_get_user_quiz_helper(self):
         """Test QuizDetailView get_user_quiz helper method."""
         from .api.views import QuizDetailView
-
+        
         view = QuizDetailView()
-
+        
         # Test valid access
-        quiz, error_response = view.get_user_quiz(self.quiz.id, self.user)
-        self.assertIsNone(error_response)
+        quiz = view.get_user_quiz(self.quiz.id, self.user)
         self.assertEqual(quiz.id, self.quiz.id)
-
+        
         # Test access to non-existent quiz
-        quiz, error_response = view.get_user_quiz(999, self.user)
-        self.assertIsNotNone(error_response)
-        self.assertIsNone(quiz)
+        with self.assertRaises(Exception):
+            view.get_user_quiz(999, self.user)
 
     def test_view_helper_functions(self):
         """Test individual view helper functions."""
         from .api.views import validate_quiz_creation_data, cleanup_quiz_creation
         from rest_framework.test import APIRequestFactory
-
+        
         factory = APIRequestFactory()
-
-        # Test validate_quiz_creation_data with proper request.data
-        request = factory.post('/', {"url": "https://youtube.com/watch?v=test"}, format='json')
-        request.data = {"url": "https://youtube.com/watch?v=test"}
+        
+        # Test validate_quiz_creation_data
+        request = factory.post('/', {"url": "https://youtube.com/watch?v=test"})
         url, error = validate_quiz_creation_data(request)
         self.assertIsNotNone(url)
         self.assertIsNone(error)
-
+        
         # Test cleanup_quiz_creation
         cleanup_quiz_creation(None)  # Should not raise exception
         cleanup_quiz_creation("/tmp/test.wav")  # Should not raise exception

@@ -44,9 +44,7 @@ class QuestionAdmin(admin.ModelAdmin):
         Display shortened question title.
         """
         return (
-            obj.question_title[:50] + "..."
-            if len(obj.question_title) > 50
-            else obj.question_title
+            obj.question_title[:50] + "..." if len(obj.question_title) > 50 else obj.question_title
         )
 
     question_title_short.short_description = "Question"

@@ -104,15 +104,11 @@ def configure_gemini_model():
     return genai.GenerativeModel("gemini-1.5-flash")
 
 
-def create_quiz_prompt(transcript, video_title):
+def get_quiz_structure_template():
     """
-    Create prompt for Gemini AI.
+    Get the basic quiz structure template.
     """
-    return f"""Based on the following transcript, generate a quiz in valid JSON format.
-
-The quiz must follow this exact structure:
-
-{{
+    return '''{{
   "title": "Create a concise quiz title based on the topic of the transcript.",
   "description": "Summarize the transcript in no more than 150 characters. Do not include any quiz questions or answers.",
   "questions": [
@@ -124,13 +120,34 @@ The quiz must follow this exact structure:
     ...
     (exactly 10 questions)
   ]
-}}
+}}'''
 
-Requirements:
+
+def get_quiz_requirements():
+    """
+    Get the requirements text for quiz generation.
+    """
+    return '''Requirements:
 - Each question must have exactly 4 distinct answer options.
 - Only one correct answer is allowed per question, and it must be present in 'question_options'.
 - The output must be valid JSON and parsable as-is (e.g., using Python's json.loads).
-- Do not include explanations, comments, or any text outside the JSON.
+- Do not include explanations, comments, or any text outside the JSON.'''
+
+
+def create_quiz_prompt(transcript, video_title):
+    """
+    Create prompt for Gemini AI.
+    """
+    structure = get_quiz_structure_template()
+    requirements = get_quiz_requirements()
+    
+    return f"""Based on the following transcript, generate a quiz in valid JSON format.
+
+The quiz must follow this exact structure:
+
+{structure}
+
+{requirements}
 
 {transcript}"""
 

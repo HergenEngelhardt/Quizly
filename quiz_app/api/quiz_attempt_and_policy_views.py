@@ -92,14 +92,10 @@ def save_quiz_answer_view(request, attempt_id):
         attempt.answers[str(question_id)] = answer
         attempt.save()
 
-        return Response(
-            {"detail": "Answer saved successfully."}, status=status.HTTP_200_OK
-        )
+        return Response({"detail": "Answer saved successfully."}, status=status.HTTP_200_OK)
 
     except QuizAttempt.DoesNotExist:
-        return Response(
-            {"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception:
         return Response(
             {"detail": "Internal server error."},
@@ -157,14 +153,27 @@ def complete_quiz_view(request, attempt_id):
         )
 
     except QuizAttempt.DoesNotExist:
-        return Response(
-            {"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({"detail": "Quiz attempt not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception:
         return Response(
             {"detail": "Internal server error."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+
+
+def create_question_result(question, user_answer):
+    """
+    Create result data for a single question.
+    """
+    is_correct = user_answer == question.answer
+    
+    return {
+        "question": question.question_title,
+        "options": question.question_options,
+        "correct_answer": question.answer,
+        "user_answer": user_answer,
+        "is_correct": is_correct,
+    }
 
 
 @api_view(["GET"])
@@ -183,17 +192,7 @@ def get_quiz_results_view(request, attempt_id):
 
         for question in questions:
             user_answer = attempt.answers.get(str(question.id))
-            is_correct = user_answer == question.answer
-
-            results.append(
-                {
-                    "question": question.question_title,
-                    "options": question.question_options,
-                    "correct_answer": question.answer,
-                    "user_answer": user_answer,
-                    "is_correct": is_correct,
-                }
-            )
+            results.append(create_question_result(question, user_answer))
 
         return Response(
             {

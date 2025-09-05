@@ -11,7 +11,7 @@ class AuthAppConfig(AppConfig):
 
     Handles user registration, login, logout and JWT token management.
     """
-    
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'auth_app'
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "auth_app"
     name = "auth_app"
