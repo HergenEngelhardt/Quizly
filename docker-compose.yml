@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+      - static_volume:/app/staticfiles
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=quizly
+      - POSTGRES_USER=quizly_user
+      - POSTGRES_PASSWORD=quizly_password
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+  media_volume:
+  static_volume:
