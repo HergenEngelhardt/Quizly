@@ -149,6 +149,69 @@ class AuthenticationUtilsTestCase(TestCase):
         # Token should now be blacklisted
         self.assertTrue(is_token_blacklisted(test_token))
 
+    def test_api_utils_get_tokens_for_user(self):
+        """Test API utils token generation."""
+        from auth_app.api.utils import get_tokens_for_user
+        
+        tokens = get_tokens_for_user(self.user)
+        self.assertIn("access", tokens)
+        self.assertIn("refresh", tokens)
+        self.assertIsInstance(tokens["access"], str)
+        self.assertIsInstance(tokens["refresh"], str)
+
+    def test_api_utils_set_jwt_cookies(self):
+        """Test API utils setting JWT cookies."""
+        from auth_app.api.utils import set_jwt_cookies
+        from django.http import HttpResponse
+        
+        response = HttpResponse()
+        tokens = {"access": "test_access_token", "refresh": "test_refresh_token"}
+        
+        result = set_jwt_cookies(response, tokens)
+        self.assertEqual(result, response)
+        self.assertIn("access_token", result.cookies)
+        self.assertIn("refresh_token", result.cookies)
+        
+        # Check cookie properties
+        access_cookie = result.cookies["access_token"]
+        refresh_cookie = result.cookies["refresh_token"]
+        self.assertTrue(access_cookie["httponly"])
+        self.assertTrue(refresh_cookie["httponly"])
+
+    def test_api_utils_clear_jwt_cookies(self):
+        """Test API utils clearing JWT cookies."""
+        from auth_app.api.utils import clear_jwt_cookies
+        from django.http import HttpResponse
+        
+        response = HttpResponse()
+        result = clear_jwt_cookies(response)
+        self.assertEqual(result, response)
+
+    def test_api_utils_blacklist_token(self):
+        """Test API utils token blacklisting."""
+        from auth_app.api.utils import blacklist_token, is_token_blacklisted
+        
+        test_token = "api_test_token_12345"
+        
+        # Token should not be blacklisted initially
+        self.assertFalse(is_token_blacklisted(test_token))
+        
+        # Blacklist the token
+        result = blacklist_token(test_token)
+        self.assertTrue(result)
+        
+        # Token should now be blacklisted
+        self.assertTrue(is_token_blacklisted(test_token))
+
+    def test_api_utils_blacklist_token_exception(self):
+        """Test API utils blacklist token with exception handling."""
+        from auth_app.api.utils import blacklist_token
+        from unittest.mock import patch
+        
+        with patch('auth_app.api.utils.BlacklistedToken.objects.create', side_effect=Exception("Test error")):
+            result = blacklist_token("error_token")
+            self.assertFalse(result)
+
     def test_is_token_blacklisted_nonexistent(self):
         """Test checking blacklist status of nonexistent token."""
         from auth_app.utils import is_token_blacklisted
