@@ -88,12 +88,27 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Check if we're running in Docker (PostgreSQL) or locally (SQLite)
+if os.getenv('DATABASE_URL') and 'postgres' in os.getenv('DATABASE_URL', ''):
+    # Docker/Production PostgreSQL configuration
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB", "quizly"),
+            "USER": os.getenv("POSTGRES_USER", "quizly_user"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", "quizly_password"),
+            "HOST": os.getenv("DB_HOST", "db"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+        }
     }
-}
+else:
+    # Local development SQLite configuration
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
