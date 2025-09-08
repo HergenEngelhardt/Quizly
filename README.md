@@ -109,12 +109,6 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 7. (Optional) Load sample data
-
-```bash
-python manage.py loaddata fixtures/sample_data.json
-```
-
 ## Running the Project
 
 ### Option 1: Local Development
@@ -190,9 +184,6 @@ docker-compose exec web python manage.py migrate
 
 # Create a superuser
 docker-compose exec web python manage.py createsuperuser
-
-# (Optional) Load sample data
-docker-compose exec web python manage.py loaddata fixtures/sample_data.json
 ```
 
 #### Docker service management
@@ -459,10 +450,6 @@ docker-compose logs -f web
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Support
 
