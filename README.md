@@ -1,70 +1,108 @@
-# Quizly
+# Quizly - My First AI Quiz Project! 🎯
 
-Quizly is an intelligent quiz generation platform API built with Django REST Framework. It leverages AI technology to automatically generate quizzes from YouTube videos, allowing users to create educational content and test their knowledge through an interactive quiz system.
+Hey! This is my quiz project that I built with Django. It takes YouTube videos and automatically creates quizzes from them - pretty cool, right? 
 
-## Features
+The idea came to me because when learning from YouTube videos, I always forgot what I had watched. So I thought: "Why not just automatically create quizzes?" 
 
-- **User authentication and authorization** - JWT token-based authentication with secure cookie handling
-- **AI-powered quiz generation** - Automatically create quizzes from YouTube videos using OpenAI Whisper and Google Generative AI
-- **Quiz management system** - Create, read, update, and delete quizzes
-- **Video transcription** - Extract audio from YouTube videos and transcribe using Whisper
-- **Question management** - Multiple-choice questions with customizable options
-- **Quiz attempt tracking** - Track user quiz sessions and scores
-- **Token blacklisting** - Secure logout with token invalidation
-- **User-specific content** - Each user can only access their own quizzes
+## What can my app do?
 
-## Technology Stack
+- 🔐 **Users can sign up** - Everyone has their own quizzes
+- 🤖 **AI does all the work** - YouTube link in, quiz comes out!
+- 📝 **Manage quizzes** - Create, view, edit, delete
+- 🎧 **Extract audio from videos** - The AI does this for me
+- ❓ **Multiple-choice questions** - Like in school, but better
+- 📊 **Track quiz attempts** - Who did what and how well
+- 🔒 **Secure logout** - Tokens are properly deleted
+- 👤 **Everyone only sees their own stuff** - Privacy first!
 
-- **Backend**: Django 5.2.5, Django REST Framework 3.15.2
-- **Database**: SQLite (development), PostgreSQL (production ready)
-- **Authentication**: JWT token-based authentication with SimpleJWT
-- **AI Services**: OpenAI Whisper for transcription, Google Generative AI for quiz generation
-- **Video Processing**: yt-dlp for YouTube audio extraction
-- **Image Handling**: Pillow for media processing
-- **Testing**: pytest, pytest-django, coverage
-- **Code Quality**: Black formatter, Flake8 linter
-- **Containerization**: Docker, Docker Compose
-- **Production Database**: PostgreSQL with Docker support
+## What I used (my tech list)
 
-## API Features
+- **Backend**: Django 5.2.5 (the framework), Django REST Framework 3.15.2 (for the API)
+- **Database**: SQLite (for testing), PostgreSQL (for "real" applications)
+- **Login System**: JWT Tokens (sounds fancy, but it's just secure login)
+- **AI Stuff**: OpenAI Whisper (converts speech to text), Google AI (makes the quiz questions)
+- **Video Download**: yt-dlp (downloads YouTube audio)
+- **Images**: Pillow (in case I need images someday)
+- **Tests**: pytest (so I know if everything works)
+- **Code formatting**: Black (formats code), Flake8 (finds errors)
+- **Containers**: Docker (so it runs on everyone's computer)
+- **Real Database**: PostgreSQL with Docker
 
-- RESTful API design
-- UUID-based resource identification
-- Comprehensive error handling
-- Secure HTTP-only cookie authentication
-- JSON response format
-- Detailed API documentation
+## How my API works
 
-## Prerequisites
+- REST API (that means it follows certain rules)
+- Each resource has a unique ID
+- Errors are handled properly
+- Secure cookies for login
+- Everything comes back as JSON
+- I tried to document everything
 
-### For Local Development
-- Python 3.8+
-- Git
-- Web browser
-- YouTube API access (optional, for enhanced features)
-- OpenAI API key (for AI features)
-- Google AI API key (for quiz generation)
+## What you need to get it running
 
-### For Docker Development (Recommended)
+### If you want to run it locally
+- Python 3.8 or newer
+- Git (to get the code)
+- A web browser
+- **FFMPEG** (needed for audio processing - see below!)
+- YouTube API access (optional, for more features)
+- OpenAI API Key (for AI features)
+- Google AI API Key (for quiz creation)
+
+#### Installing FFMPEG (important!)
+
+**Windows - Option 1: Download**
+1. Go to: https://ffmpeg.org/download.html
+   - Best to take Windows builds from gyan.dev or BtbN
+2. Extract ZIP file to `C:\ffmpeg`
+3. Add the path to environment variables:
+   - Right-click "This PC" → "Properties" → "Advanced System Settings"
+   - "Environment Variables..." → In Path add `C:\ffmpeg\bin`
+
+**Windows - Option 2: Command Line (easier)**
+```powershell
+winget install --id Gyan.FFmpeg -e --source winget
+```
+
+**macOS (for Mac users)**
+1. Install Homebrew (if not already there):
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+2. Install FFmpeg:
+   ```bash
+   brew install ffmpeg
+   ```
+
+**Linux (Ubuntu/Debian)**
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+### If you use Docker (I recommend this!)
 - Docker Desktop (installed and running)
-- Docker Compose (included with Docker Desktop)
+- Docker Compose (comes with Docker Desktop)
 - Git
-- Web browser
-- OpenAI API key (for AI features)
-- Google AI API key (for quiz generation)
+- A web browser  
+- OpenAI API Key
+- Google AI API Key
 
-**Note**: Docker Desktop provides a user-friendly interface to manage containers, view logs, and monitor your application. Make sure it's running before starting the project.
+**Important**: With Docker you don't need to install FFMPEG yourself - Docker does it for you!
 
-## Installation
+**Tip**: Docker Desktop is super handy. You can look at containers, read logs, and manage everything. Make sure it's running before you start.
 
-### 1. Clone the repository
+## How to install my project
+
+### 1. Get the code
 
 ```bash
 git clone https://github.com/HergenEngelhardt/Quizly.git
 cd Quizly
 ```
 
-### 2. Set up virtual environment
+### 2. Set up Python environment (Virtual Environment)
+
+This is important so packages don't mix with other projects:
 
 ```bash
 python -m venv .venv
@@ -80,101 +118,101 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3. Install dependencies
+### 3. Install all required packages
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Environment configuration
+### 4. Create configuration file
 
-Create a `.env` file in the project root:
+Create a `.env` file in the main folder and add your API keys:
 
 ```env
 SECRET_KEY=your-secret-key-here
 DEBUG=True
-OPENAI_API_KEY=your-openai-api-key
-GOOGLE_API_KEY=your-google-ai-api-key
+OPENAI_API_KEY=your-openai-key
+GOOGLE_API_KEY=your-google-ai-key
 ```
 
-### 5. Database setup
+### 5. Prepare database
 
 ```bash
 python manage.py migrate
 ```
 
-### 6. Create a superuser
+### 6. Create admin user
 
 ```bash
 python manage.py createsuperuser
 ```
 
-## Running the Project
+## How to start my project
 
-### Option 1: Local Development
+### Option 1: Locally on your computer
 
-#### Start the backend server
+#### Start backend server
 
 ```bash
 python manage.py runserver
 ```
 
-The server will start at http://127.0.0.1:8000/
+Then go to: http://127.0.0.1:8000/
 
-### Option 2: Docker (Recommended)
+### Option 2: With Docker (I prefer this!)
 
-#### Prerequisites for Docker
-- Docker Desktop installed and running
-- Docker Compose installed (included with Docker Desktop)
+#### What you need for Docker
+- Docker Desktop must be installed and started
+- Docker Compose (comes with Docker Desktop)
 
 #### Docker Desktop Setup
 1. **Install Docker Desktop** from https://www.docker.com/products/docker-desktop/
-2. **Start Docker Desktop** and ensure it's running (check system tray icon)
-3. **Verify Docker installation**:
+2. **Start Docker Desktop** (look for the icon in the taskbar)
+3. **Test if everything works**:
    ```bash
    docker --version
    docker-compose --version
    ```
 
-#### Environment Setup for Docker
+#### Configuration for Docker
 
-Create a `.env` file in the project root:
+Create a `.env` file in the main folder:
 
 ```env
 SECRET_KEY=your-secret-key-here
 DEBUG=True
-OPENAI_API_KEY=your-openai-api-key
-GEMINI_API_KEY=your-google-ai-api-key
+OPENAI_API_KEY=your-openai-key
+GEMINI_API_KEY=your-google-ai-key
 POSTGRES_DB=quizly
 POSTGRES_USER=quizly_user
 POSTGRES_PASSWORD=quizly_password
 ```
 
-#### Build and run with Docker Compose
+#### Build and start with Docker Compose
 
 ```bash
-# Ensure Docker Desktop is running first
+# First check if Docker Desktop is running!
 
-# Build the Docker images
+# Build Docker images
 docker-compose build
 
-# Start all services (web app + PostgreSQL database)
+# Start everything (web app + PostgreSQL database)
 docker-compose up -d
 
-# View logs to verify everything is working
+# Look at logs to see if everything works
 docker-compose logs -f web
 
 # Check if containers are running
 docker-compose ps
 ```
 
-#### Accessing Docker containers in Docker Desktop
+#### Look at Docker Desktop
 1. Open Docker Desktop
-2. Go to "Containers" tab
+2. Click on "Containers"
 3. You should see your "quizly" project with two running containers:
-   - `quizly-web-1` (Django application)
+   - `quizly-web-1` (Django app)
    - `quizly-db-1` (PostgreSQL database)
-4. You can view logs, inspect, and manage containers directly from Docker Desktop UI
+4. You can view logs and manage containers directly in Docker Desktop
 
 #### Initial setup with Docker
 
@@ -182,89 +220,83 @@ docker-compose ps
 # Run database migrations
 docker-compose exec web python manage.py migrate
 
-# Create a superuser
+# Create admin user
 docker-compose exec web python manage.py createsuperuser
 ```
 
-#### Docker service management
+#### Managing Docker containers
 
 ```bash
 # Check container status
 docker-compose ps
 
-# Stop all services
+# Stop everything
 docker-compose down
 
-# Stop and remove volumes (caution: deletes database data)
+# Stop and delete database (careful!)
 docker-compose down -v
 
 # Rebuild after code changes
 docker-compose build --no-cache
 docker-compose up -d
 
-# View real-time logs
+# Watch live logs
 docker-compose logs -f
 
-# Access container shell (for debugging)
+# Look inside containers (for debugging)
 docker-compose exec web bash
 docker-compose exec db psql -U quizly_user -d quizly
 ```
 
-#### Troubleshooting Docker Issues
+#### When Docker doesn't work
 
-**If containers won't start:**
-1. Ensure Docker Desktop is running
-2. Check if ports 8000 and 5432 are available
-3. View container logs: `docker-compose logs`
+**Containers won't start:**
+1. Docker Desktop must be running
+2. Ports 8000 and 5432 must be free
+3. Check logs: `docker-compose logs`
 
-**If database connection fails:**
-1. Wait for PostgreSQL to fully initialize (first run takes longer)
+**Database connection doesn't work:**
+1. PostgreSQL needs some time on first start
 2. Check database logs: `docker-compose logs db`
-3. Verify environment variables in `.env` file
+3. Check your `.env` file again
 
-**Performance issues:**
-1. Allocate more resources to Docker Desktop (Settings → Resources)
-2. Enable WSL 2 backend on Windows for better performance
+**Runs slowly:**
+1. Give Docker Desktop more RAM (Settings → Resources)
+2. On Windows: Enable WSL 2
 
-The application will be available at http://127.0.0.1:8000/
+The app will run at: http://127.0.0.1:8000/
 
-### Access the application
+### Where to find the app
 
 - **API**: http://127.0.0.1:8000/api/
 - **Admin Interface**: http://127.0.0.1:8000/admin/
-- **Frontend**: Connect your frontend application to the API endpoints
+- **Frontend**: Connect your frontend to the API endpoints
 
-## API Endpoints
+## My API endpoints (for other developers)
 
-| Endpoint | Method | Description | Authentication |
-|----------|--------|-------------|----------------|
-| `/api/register/` | POST | User registration | No |
-| `/api/login/` | POST | User authentication | No |
-| `/api/logout/` | POST | User logout | Yes |
-| `/api/token/refresh/` | POST | Refresh access token | No |
+| URL | Method | What it does | Login needed? |
+|-----|--------|--------------|---------------|
+| `/api/register/` | POST | Create new user | No |
+| `/api/login/` | POST | Login | No |
+| `/api/logout/` | POST | Logout | Yes |
+| `/api/token/refresh/` | POST | Refresh token | No |
 | `/api/createQuiz/` | POST | Create quiz from YouTube URL | Yes |
-| `/api/quizzes/` | GET | List user's quizzes | Yes |
-| `/api/quizzes/{id}/` | GET | Get specific quiz | Yes |
-| `/api/quizzes/{id}/` | PUT | Update quiz (full) | Yes |
-| `/api/quizzes/{id}/` | PATCH | Update quiz (partial) | Yes |
+| `/api/quizzes/` | GET | Show all your quizzes | Yes |
+| `/api/quizzes/{id}/` | GET | Show specific quiz | Yes |
+| `/api/quizzes/{id}/` | PUT | Edit quiz completely | Yes |
+| `/api/quizzes/{id}/` | PATCH | Edit quiz partially | Yes |
 | `/api/quizzes/{id}/` | DELETE | Delete quiz | Yes |
 
-## API Usage Examples
+## Examples of how to use my API
 
-### User Registration
+### Create new user
 ```bash
 curl -X POST http://127.0.0.1:8000/api/register/ \
   -H "Content-Type: application/json" \
   -d '{"username": "testuser", "email": "test@example.com", "password": "securepassword"}'
 ```
 
-### User Login
-```bash
-curl -X POST http://127.0.0.1:8000/api/login/ \
-  -H "Content-Type: application/json" \
-  -d '{"username": "testuser", "password": "securepassword"}'
-```
-
+### Login
 ### Create Quiz from YouTube URL
 ```bash
 curl -X POST http://127.0.0.1:8000/api/createQuiz/ \
@@ -273,22 +305,22 @@ curl -X POST http://127.0.0.1:8000/api/createQuiz/ \
   -d '{"url": "https://www.youtube.com/watch?v=VIDEO_ID"}'
 ```
 
-### List User's Quizzes
+### List Your Quizzes
 ```bash
 curl -X GET http://127.0.0.1:8000/api/quizzes/ \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-## Development
+## Development (for nerds like me)
 
 ### Local Development Setup
 
-Format code:
+Format code (make it pretty):
 ```bash
 black .
 ```
 
-Lint code:
+Check for errors:
 ```bash
 flake8 .
 ```
@@ -374,7 +406,7 @@ Create superuser:
 python manage.py createsuperuser
 ```
 
-## Production Deployment
+## Production Deployment (when it gets serious)
 
 1. Set `DEBUG=False` in your environment
 2. Configure proper database (PostgreSQL recommended)
@@ -398,25 +430,25 @@ OPENAI_API_KEY=your-openai-api-key
 GOOGLE_API_KEY=your-google-ai-api-key
 ```
 
-## Troubleshooting
+## When things go wrong (Troubleshooting)
 
 ### Common Issues
 
 - **Migration errors**: Run `python manage.py migrate --fake-initial`
-- **Permission errors**: Ensure proper file permissions on database and media files
-- **CORS errors**: Check CORS settings in `settings.py` and ensure frontend domain is allowed
-- **API key errors**: Verify OpenAI and Google AI API keys are correctly set in environment variables
-- **YouTube download errors**: Check yt-dlp version and update if necessary
-- **Audio transcription errors**: Ensure Whisper model is properly installed and accessible
+- **Permission errors**: Make sure files have proper permissions
+- **CORS errors**: Check CORS settings and make sure your frontend domain is allowed
+- **API key errors**: Double-check your OpenAI and Google AI API keys
+- **YouTube download errors**: Update yt-dlp if it's old
+- **Audio transcription errors**: Make sure Whisper is properly installed
 
 ### Docker-specific Issues
 
-- **Container won't start**: Check Docker logs with `docker-compose logs web`
-- **Database connection errors**: Ensure PostgreSQL container is running with `docker-compose ps`
-- **Port conflicts**: Change port mapping in `docker-compose.yml` if port 8000 is occupied
-- **Volume mounting issues**: On Windows, ensure Docker has access to your drive
-- **Build failures**: Try `docker-compose build --no-cache` to rebuild from scratch
-- **Permission issues**: On Linux/macOS, check file permissions for Docker volumes
+- **Container won't start**: Check logs with `docker-compose logs web`
+- **Database connection errors**: Make sure PostgreSQL container is running with `docker-compose ps`
+- **Port conflicts**: Change port in `docker-compose.yml` if 8000 is taken
+- **Volume mounting issues**: On Windows, make sure Docker can access your drive
+- **Build failures**: Try `docker-compose build --no-cache` to start fresh
+- **Permission issues**: On Linux/macOS, check file permissions
 
 ### Debug Mode
 
@@ -435,34 +467,40 @@ python manage.py runserver --verbosity=2
 docker-compose logs -f web
 ```
 
-### Performance Optimization
+### Performance Tips (making it faster)
 
-- Use database indexing for frequently queried fields
-- Implement caching for expensive operations
+- Use database indexing for stuff you search a lot
+- Cache expensive operations
 - Optimize AI model calls by batching requests
 - Use pagination for large result sets
 - Consider using background tasks for video processing
 
-## Contributing
+## Contributing (if you want to help)
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feature/awesome-feature`)
+3. Commit your changes (`git commit -m 'Add awesome feature'`)
+4. Push to the branch (`git push origin feature/awesome-feature`)
 5. Open a Pull Request
 
-## Support
+## Support (when you need help)
 
 For issues and questions:
-- Check the documentation above
-- Review existing issues in the repository
+- Check this documentation first
+- Look at existing issues in the repository
 - Create a new issue with detailed description
-- Contact the development team
+- Contact me if needed
 
-## Acknowledgments
+## Thank you!
 
 - OpenAI for Whisper speech recognition
 - Google for Generative AI services
 - Django and Django REST Framework communities
 - yt-dlp for YouTube video processing
+- Django and Django REST Framework communities
+- OpenAI for Whisper
+- Google for their AI services
+- yt-dlp developers
 - All contributors and testers
+
+Thanks for checking out my project! 🚀
