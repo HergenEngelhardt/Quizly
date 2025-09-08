@@ -25,7 +25,6 @@ def set_jwt_cookies(response, tokens):
     access_token = tokens["access"]
     refresh_token = tokens["refresh"]
 
-    # Set access token cookie
     response.set_cookie(
         "access_token",
         access_token,
@@ -35,7 +34,6 @@ def set_jwt_cookies(response, tokens):
         samesite="Lax",
     )
 
-    # Set refresh token cookie
     response.set_cookie(
         "refresh_token",
         refresh_token,

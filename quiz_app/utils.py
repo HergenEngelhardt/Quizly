@@ -236,7 +236,7 @@ def cleanup_temp_file(file_path):
         if os.path.exists(file_path):
             _remove_file_and_directory(file_path)
     except Exception:
-        pass  # Ignore cleanup errors
+        pass 
 
 
 def _remove_file_and_directory(file_path):

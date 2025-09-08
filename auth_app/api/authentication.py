@@ -39,7 +39,6 @@ class JWTCookieAuthentication(JWTAuthentication):
         if raw_token is None:
             return None
 
-        # Check if token is blacklisted
         if is_token_blacklisted(raw_token):
             return None
 

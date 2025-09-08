@@ -130,10 +130,6 @@ class QuizDetailView(APIView):
         quiz.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-# Additional endpoints for User Stories 7-10
-
-
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_recent_quizzes_view(request):

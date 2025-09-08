@@ -20,7 +20,6 @@ urlpatterns = [
     path("createQuiz/", create_quiz_view, name="create_quiz"),
     path("quizzes/", list_quizzes_view, name="list_quizzes"),
     path("quizzes/<int:quiz_id>/", QuizDetailView.as_view(), name="quiz_detail"),
-    # Additional endpoints for User Stories 7-10
     path("quizzes/recent/", get_recent_quizzes_view, name="recent_quizzes"),
     path("quizzes/<int:quiz_id>/start/", start_quiz_attempt_view, name="start_quiz"),
     path(
@@ -32,7 +31,6 @@ urlpatterns = [
     path(
         "attempts/<str:attempt_id>/results/", get_quiz_results_view, name="quiz_results"
     ),
-    # Legal pages
     path("privacy/", privacy_policy_view, name="privacy_policy"),
     path("legal/", legal_notice_view, name="legal_notice"),
 ]

@@ -54,7 +54,6 @@ def start_quiz_attempt_view(request, quiz_id):
     try:
         quiz = get_object_or_404(Quiz, id=quiz_id, user=request.user)
 
-        # Create new attempt
         attempt = QuizAttempt.objects.create(quiz=quiz, user=request.user, answers={})
 
         serializer = QuizAttemptSerializer(attempt)
@@ -141,7 +140,6 @@ def complete_quiz_view(request, attempt_id):
 
         score, correct_answers, total_questions = calculate_quiz_score(attempt)
 
-        # Update attempt
         attempt.score = score
         attempt.completed_at = timezone.now()
         attempt.save()

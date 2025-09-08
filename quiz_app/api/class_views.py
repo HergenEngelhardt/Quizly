@@ -19,7 +19,6 @@ class QuizDetailView(APIView):
     def get(self, request, quiz_id):
         """Get specific quiz for authenticated user."""
         try:
-            # First check if quiz exists at all
             try:
                 quiz = get_object_or_404(Quiz, id=quiz_id)
             except Quiz.DoesNotExist:
@@ -27,7 +26,6 @@ class QuizDetailView(APIView):
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
             
-            # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
                     {"detail": "Access denied - Quiz does not belong to user."}, 
@@ -44,7 +42,6 @@ class QuizDetailView(APIView):
     def put(self, request, quiz_id):
         """Update quiz (full update)."""
         try:
-            # First check if quiz exists at all
             try:
                 quiz = get_object_or_404(Quiz, id=quiz_id)
             except Quiz.DoesNotExist:
@@ -52,7 +49,6 @@ class QuizDetailView(APIView):
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
             
-            # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
                     {"detail": "Access denied - Quiz does not belong to user."}, 
@@ -73,7 +69,6 @@ class QuizDetailView(APIView):
     def patch(self, request, quiz_id):
         """Partially update quiz."""
         try:
-            # First check if quiz exists at all
             try:
                 quiz = get_object_or_404(Quiz, id=quiz_id)
             except Quiz.DoesNotExist:
@@ -81,7 +76,6 @@ class QuizDetailView(APIView):
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
             
-            # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
                     {"detail": "Access denied - Quiz does not belong to user."}, 
@@ -102,7 +96,6 @@ class QuizDetailView(APIView):
     def delete(self, request, quiz_id):
         """Delete quiz permanently."""
         try:
-            # First check if quiz exists at all
             try:
                 quiz = get_object_or_404(Quiz, id=quiz_id)
             except Quiz.DoesNotExist:
@@ -110,7 +103,6 @@ class QuizDetailView(APIView):
                     {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
                 )
             
-            # Then check if user owns the quiz
             if quiz.user != request.user:
                 return Response(
                     {"detail": "Access denied - Quiz does not belong to user."}, 
