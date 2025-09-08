@@ -1,4 +1,4 @@
-# Quizly - My First AI Quiz Project! 🎯
+# Quizly - My First AI Quiz Project! 
 
 Hey! This is my quiz project that I built with Django. It takes YouTube videos and automatically creates quizzes from them - pretty cool, right? 
 
@@ -6,14 +6,14 @@ The idea came to me because when learning from YouTube videos, I always forgot w
 
 ## What can my app do?
 
-- 🔐 **Users can sign up** - Everyone has their own quizzes
-- 🤖 **AI does all the work** - YouTube link in, quiz comes out!
-- 📝 **Manage quizzes** - Create, view, edit, delete
-- 🎧 **Extract audio from videos** - The AI does this for me
-- ❓ **Multiple-choice questions** - Like in school, but better
-- 📊 **Track quiz attempts** - Who did what and how well
-- 🔒 **Secure logout** - Tokens are properly deleted
-- 👤 **Everyone only sees their own stuff** - Privacy first!
+- **Users can sign up** - Everyone has their own quizzes
+- **AI does all the work** - YouTube link in, quiz comes out!
+- **Manage quizzes** - Create, view, edit, delete
+- **Extract audio from videos** - The AI does this for me
+- **Multiple-choice questions** - Like in school, but better
+- **Track quiz attempts** - Who did what and how well
+- **Secure logout** - Tokens are properly deleted
+- **Everyone only sees their own stuff** - Privacy first!
 
 ## What I used (my tech list)
 
