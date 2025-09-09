@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from quiz_app.models import Quiz
 from .serializers import (
     QuizSerializer,
+    QuizListSerializer,
     QuizCreateSerializer,
     QuizUpdateSerializer,
 )
@@ -49,7 +50,7 @@ def list_quizzes_view(request):
     """
     try:
         quizzes = Quiz.objects.filter(user=request.user)
-        serializer = QuizSerializer(quizzes, many=True)
+        serializer = QuizListSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception:
         return Response(
@@ -85,42 +86,66 @@ class QuizDetailView(APIView):
 
     def get(self, request, id):
         """Get specific quiz for authenticated user."""
-        quiz, error_response = self.get_user_quiz(id, request.user)
-        if error_response:
-            return error_response
+        try:
+            quiz, error_response = self.get_user_quiz(id, request.user)
+            if error_response:
+                return error_response
 
-        serializer = QuizSerializer(quiz)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            serializer = QuizSerializer(quiz)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception:
+            return Response(
+                {"detail": "Internal server error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def put(self, request, id):
         """Update quiz (full update)."""
-        quiz, error_response = self.get_user_quiz(id, request.user)
-        if error_response:
-            return error_response
+        try:
+            quiz, error_response = self.get_user_quiz(id, request.user)
+            if error_response:
+                return error_response
 
-        serializer = QuizUpdateSerializer(quiz, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
-        return Response({"detail": "Invalid request data."}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = QuizUpdateSerializer(quiz, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
+            return Response({"detail": "Invalid request data."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response(
+                {"detail": "Internal server error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def patch(self, request, id):
         """Partially update quiz."""
-        quiz, error_response = self.get_user_quiz(id, request.user)
-        if error_response:
-            return error_response
+        try:
+            quiz, error_response = self.get_user_quiz(id, request.user)
+            if error_response:
+                return error_response
 
-        serializer = QuizUpdateSerializer(quiz, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
-        return Response({"detail": "Invalid request data."}, status=status.HTTP_400_BAD_REQUEST)
+            serializer = QuizUpdateSerializer(quiz, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
+            return Response({"detail": "Invalid request data."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response(
+                {"detail": "Internal server error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def delete(self, request, id):
         """Delete quiz permanently."""
-        quiz, error_response = self.get_user_quiz(id, request.user)
-        if error_response:
-            return error_response
+        try:
+            quiz, error_response = self.get_user_quiz(id, request.user)
+            if error_response:
+                return error_response
 
-        quiz.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+            quiz.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception:
+            return Response(
+                {"detail": "Internal server error."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -297,6 +297,12 @@ curl -X POST http://127.0.0.1:8000/api/register/ \
 ```
 
 ### Login
+```bash
+curl -X POST http://127.0.0.1:8000/api/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "securepassword"}'
+```
+
 ### Create Quiz from YouTube URL
 ```bash
 curl -X POST http://127.0.0.1:8000/api/createQuiz/ \
@@ -310,6 +316,48 @@ curl -X POST http://127.0.0.1:8000/api/createQuiz/ \
 curl -X GET http://127.0.0.1:8000/api/quizzes/ \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
+
+### Get Specific Quiz
+```bash
+curl -X GET http://127.0.0.1:8000/api/quizzes/1/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Update Quiz (Complete)
+```bash
+curl -X PUT http://127.0.0.1:8000/api/quizzes/1/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{"title": "Updated Quiz Title", "description": "Updated description", "video_url": "https://www.youtube.com/watch?v=NEW_VIDEO_ID"}'
+```
+
+### Update Quiz (Partial)
+```bash
+curl -X PATCH http://127.0.0.1:8000/api/quizzes/1/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{"title": "New Title Only"}'
+```
+
+### Delete Quiz
+```bash
+curl -X DELETE http://127.0.0.1:8000/api/quizzes/1/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Logout
+```bash
+curl -X POST http://127.0.0.1:8000/api/logout/ \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### Refresh Token
+```bash
+curl -X POST http://127.0.0.1:8000/api/token/refresh/ \
+  -H "Content-Type: application/json"
+```
+
+**Note**: The API uses HTTP-only cookies for authentication. When using the browser or frontend applications, tokens are automatically managed via cookies. The `Authorization: Bearer` header examples above are for manual testing with curl.
 
 ## Development (for nerds like me)
 
