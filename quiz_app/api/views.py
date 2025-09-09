@@ -36,7 +36,7 @@ def create_quiz_view(request):
         
     except Exception as e:
         return Response(
-            {"detail": f"Error creating quiz: {str(e)}"},
+            {"detail": "Internal server error."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
@@ -73,12 +73,12 @@ class QuizDetailView(APIView):
             quiz = Quiz.objects.get(id=id)
         except Quiz.DoesNotExist:
             return None, Response(
-                {"detail": "Quiz not found."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": "Quiz nicht gefunden."}, status=status.HTTP_404_NOT_FOUND
             )
 
         if quiz.user != user:
             return None, Response(
-                {"detail": "Access denied."},
+                {"detail": "Zugriff verweigert - Quiz gehört nicht dem Benutzer."},
                 status=status.HTTP_403_FORBIDDEN,
             )
         return quiz, None
@@ -102,7 +102,7 @@ class QuizDetailView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Ungültige Anfragedaten."}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, id):
         """Partially update quiz."""
@@ -114,7 +114,7 @@ class QuizDetailView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Ungültige Anfragedaten."}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
         """Delete quiz permanently."""
