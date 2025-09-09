@@ -12,10 +12,26 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     Serializer for creating new user accounts.
 
-    Validates username, email uniqueness and password strength.
+    Validates username, email uniqueness and password strength according to API specification.
     """
 
-    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password = serializers.CharField(
+        write_only=True, 
+        validators=[validate_password],
+        required=True,
+        allow_blank=False,
+        trim_whitespace=True
+    )
+    username = serializers.CharField(
+        required=True,
+        allow_blank=False,
+        trim_whitespace=True
+    )
+    email = serializers.EmailField(
+        required=True,
+        allow_blank=False,
+        trim_whitespace=True
+    )
 
     class Meta:
         model = User
@@ -23,7 +39,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         """
-        Check if email already exists.
+        Check if email already exists and is valid.
 
         Args:
             value (str): Email address to validate
@@ -32,15 +48,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             str: Validated email address
 
         Raises:
-            ValidationError: If email already exists
+            ValidationError: If email already exists or is invalid
         """
+        if not value or not value.strip():
+            raise serializers.ValidationError("Email is required.")
+        
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists.")
         return value
 
     def validate_username(self, value):
         """
-        Check if username already exists.
+        Check if username already exists and meets requirements.
 
         Args:
             value (str): Username to validate
@@ -49,11 +68,41 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             str: Validated username
 
         Raises:
-            ValidationError: If username already exists
+            ValidationError: If username already exists or is invalid
         """
+        if not value or not value.strip():
+            raise serializers.ValidationError("Username is required.")
+            
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError("Username already exists.")
         return value
+
+    def validate(self, attrs):
+        """
+        Validate all required fields are present according to API specification.
+
+        Args:
+            attrs (dict): All input data
+
+        Returns:
+            dict: Validated data
+
+        Raises:
+            ValidationError: If required fields are missing
+        """
+        required_fields = ['username', 'password', 'email']
+        missing_fields = []
+        
+        for field in required_fields:
+            if field not in attrs or not attrs[field]:
+                missing_fields.append(field)
+        
+        if missing_fields:
+            raise serializers.ValidationError(
+                f"The following fields are required: {', '.join(missing_fields)}"
+            )
+        
+        return attrs
 
     def create(self, validated_data):
         """

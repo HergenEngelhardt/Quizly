@@ -282,7 +282,7 @@ def _get_empty_video_info():
 def validate_quiz_creation_data(serializer):
     """Validate request data for quiz creation."""
     if not serializer.is_valid():
-        return None, {"detail": "Ungültige URL oder Anfragedaten."}
+        return None, {"detail": "Invalid URL or request data."}
     return serializer.validated_data["url"], None
 
 

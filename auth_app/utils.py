@@ -79,14 +79,16 @@ def handle_user_registration(serializer):
         return Response(
             {"detail": "User created successfully!"}, status=status.HTTP_201_CREATED
         )
-    return Response({"detail": "Ungültige Daten."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Return specific validation errors instead of generic message
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def handle_user_login(serializer, request):
     """Handle user login logic."""
     if not serializer.is_valid():
         return Response(
-            {"detail": "Ungültige Anmeldedaten."},
+            {"detail": "Invalid credentials."},
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
@@ -130,7 +132,7 @@ def handle_token_refresh(request):
 
     if not refresh_token:
         return Response(
-            {"detail": "Refresh Token ungültig oder fehlt."},
+            {"detail": "Refresh token invalid or missing."},
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
@@ -148,6 +150,6 @@ def handle_token_refresh(request):
 
     except TokenError:
         return Response(
-            {"detail": "Refresh Token ungültig oder fehlt."},
+            {"detail": "Refresh token invalid or missing."},
             status=status.HTTP_401_UNAUTHORIZED,
         )
