@@ -3,7 +3,7 @@ Simple serializers for quiz API endpoints.
 """
 
 from rest_framework import serializers
-from quiz_app.models import Quiz, Question, QuizAttempt
+from quiz_app.models import Quiz, Question
 from django.core.validators import URLValidator
 from urllib.parse import urlparse
 
@@ -49,41 +49,6 @@ class QuizSerializer(serializers.ModelSerializer):
             "questions",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
-
-
-class QuizListSerializer(serializers.ModelSerializer):
-    """
-    Simplified serializer for quiz listings.
-    """
-
-    class Meta:
-        model = Quiz
-        fields = [
-            "id",
-            "title",
-            "description",
-            "created_at",
-            "video_url",
-        ]
-        read_only_fields = ["id", "created_at"]
-
-
-class QuizAttemptSerializer(serializers.ModelSerializer):
-    """
-    Serializer for quiz attempts.
-    """
-
-    class Meta:
-        model = QuizAttempt
-        fields = [
-            "id",
-            "quiz",
-            "answers",
-            "score",
-            "completed_at",
-            "created_at",
-        ]
-        read_only_fields = ["id", "quiz", "created_at"]
 
 
 class QuizCreateSerializer(serializers.Serializer):
