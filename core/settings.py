@@ -89,7 +89,16 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Check if we're running in Docker (PostgreSQL) or locally (SQLite)
-if os.getenv('DATABASE_URL') and 'postgres' in os.getenv('DATABASE_URL', ''):
+# Use environment variable FORCE_SQLITE=true to force SQLite usage
+if os.getenv('FORCE_SQLITE', '').lower() == 'true':
+    # Force SQLite for local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+elif os.getenv('DATABASE_URL') and 'postgres' in os.getenv('DATABASE_URL', ''):
     # Docker/Production PostgreSQL configuration
     DATABASES = {
         "default": {
@@ -102,7 +111,7 @@ if os.getenv('DATABASE_URL') and 'postgres' in os.getenv('DATABASE_URL', ''):
         }
     }
 else:
-    # Local development SQLite configuration
+    # Local development SQLite configuration (default)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",

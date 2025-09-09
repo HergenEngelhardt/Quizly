@@ -15,23 +15,17 @@ docker ps
 ```
 
 ### 2. Umgebungsvariablen konfigurieren
-Stellen Sie sicher, dass Ihre `.env` Datei korrekt konfiguriert ist:
+Die Docker-Konfiguration verwendet automatisch PostgreSQL. Stellen Sie sicher, dass Sie Ihren GEMINI_API_KEY setzen:
 
-```env
-SECRET_KEY=your-secret-key-here-change-in-production
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-DATABASE_URL=sqlite:///db.sqlite3
-GEMINI_API_KEY=your-gemini-api-key-here
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-JWT_ACCESS_TOKEN_LIFETIME=60
-JWT_REFRESH_TOKEN_LIFETIME=1440
+```powershell
+# In PowerShell setzen
+$env:GEMINI_API_KEY="your-gemini-api-key-here"
 
-# Zusätzlich für Docker mit PostgreSQL
-POSTGRES_DB=quizly
-POSTGRES_USER=quizly_user
-POSTGRES_PASSWORD=quizly_password
+# Oder in .env.docker editieren
 ```
+
+**Wichtig**: Für lokale Entwicklung ohne Docker verwenden Sie die `.env` Datei mit `FORCE_SQLITE=true`.
+Für Docker wird automatisch `.env.docker` mit PostgreSQL verwendet.
 
 ### 3. Docker Container starten
 ```powershell
@@ -42,12 +36,13 @@ docker-compose up -d --build
 docker-compose logs -f web
 ```
 
-### 4. Datenbank initialisieren
+### 4. Container Status prüfen
 ```powershell
-# Migrationen ausführen
-docker-compose exec web python manage.py migrate
+# Container Status
+docker-compose ps
 
-# Superuser erstellen
+# PostgreSQL Logs
+docker-compose logs db
 docker-compose exec web python manage.py createsuperuser
 ```
 
