@@ -133,9 +133,49 @@ Then edit the `.env` file and add your API keys:
 SECRET_KEY=your-secret-key-here
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
+FORCE_SQLITE=true
 GEMINI_API_KEY=your-google-ai-key-here
 JWT_ACCESS_TOKEN_LIFETIME=60
 ```
+
+**Important for beginners**: The configuration above uses SQLite (a simple file-based database) which is perfect for local development. You don't need to install PostgreSQL or any other database software!
+
+## Database Options Explained
+
+### Option 1: SQLite (Recommended for local development)
+This is the **easiest option** for beginners and local development:
+
+- **What it is**: A simple file-based database (db.sqlite3)
+- **Advantages**: No installation needed, works immediately
+- **Perfect for**: Learning, development, testing
+- **Configuration**: Add `FORCE_SQLITE=true` to your `.env` file
+
+```env
+# In your .env file
+FORCE_SQLITE=true
+```
+
+### Option 2: PostgreSQL with Docker (Recommended for production-like setup)
+Use this if you want a production-like environment:
+
+- **What it is**: Professional database running in Docker
+- **Advantages**: Same as production, better for team development
+- **Requirements**: Docker Desktop installed and running
+- **Configuration**: See Docker section below
+
+### Option 3: Local PostgreSQL Installation (Advanced)
+Install PostgreSQL directly on your computer:
+
+- **Requirements**: Install PostgreSQL manually
+- **Configuration**: 
+```env
+# In your .env file - remove FORCE_SQLITE line and add:
+DATABASE_URL=postgres://username:password@localhost:5432/quizly_db
+```
+
+**For most users, Option 1 (SQLite) is perfect!**
+
+**📖 For detailed database setup instructions, see [DATABASE_SETUP.md](DATABASE_SETUP.md)**
 
 ### 5. Prepare database
 ```bash
@@ -277,12 +317,19 @@ After setting up locally, you can quickly test if everything works:
 # Make sure your virtual environment is activated
 # .venv\Scripts\activate  (Windows)
 
+# Check if database is properly configured
+python manage.py check
+
 # Start the server
 python manage.py runserver
 
 # In another terminal, test the API:
 curl http://127.0.0.1:8000/api/
 ```
+
+**Expected result**: You should see a JSON response with API information.
+
+**Database check**: After running the server once, you should see a `db.sqlite3` file in your project folder. This means SQLite is working correctly!
 
 ### Test the Docker Setup
 After setting up Docker, test if everything works:
@@ -508,6 +555,8 @@ GEMINI_API_KEY=your-google-ai-api-key
 - **CORS errors**: Check CORS settings and make sure your frontend domain is allowed
 - **API key errors**: Double-check your Google AI API key
 - **YouTube download errors**: Update yt-dlp if it's old
+- **Database errors**: Make sure `FORCE_SQLITE=true` is in your `.env` file for local development
+- **No db.sqlite3 file**: Run `python manage.py migrate` to create the database
 
 ### Docker-specific Issues
 - **Container won't start**: Check logs with `docker-compose logs web`
