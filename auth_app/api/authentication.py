@@ -69,7 +69,7 @@ class JWTCookieAuthentication(JWTAuthentication):
 
         try:
             User = get_user_model()
-            user = User.objects.get(**{User.USERNAME_FIELD: user_id})
+            user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             raise InvalidToken("User not found")
 
