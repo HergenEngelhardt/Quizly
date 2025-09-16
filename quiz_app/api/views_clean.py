@@ -36,7 +36,7 @@ def create_quiz_view(request):
         
     except Exception as e:
         return Response(
-            {"detail": f"Error creating quiz: {str(e)}"},
+            {"detail": "Internal server error."},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 

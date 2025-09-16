@@ -53,8 +53,18 @@ def set_jwt_cookies(response, tokens):
 
 def clear_jwt_cookies(response):
     """Clear JWT cookies from response."""
-    response.delete_cookie("access_token")
-    response.delete_cookie("refresh_token")
+    response.delete_cookie(
+        "access_token",
+        domain=settings.SIMPLE_JWT.get("AUTH_COOKIE_DOMAIN"),
+        path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+        samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
+    )
+    response.delete_cookie(
+        "refresh_token",
+        domain=settings.SIMPLE_JWT.get("AUTH_COOKIE_DOMAIN"),
+        path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+        samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
+    )
     return response
 
 
@@ -88,7 +98,7 @@ def handle_user_login(serializer, request):
     """Handle user login logic."""
     if not serializer.is_valid():
         return Response(
-            {"detail": "Invalid credentials."},
+            serializer.errors,
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
@@ -131,6 +141,13 @@ def handle_token_refresh(request):
     refresh_token = request.COOKIES.get("refresh_token")
 
     if not refresh_token:
+        return Response(
+            {"detail": "Refresh token invalid or missing."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+    # Check if refresh token is blacklisted
+    if is_token_blacklisted(refresh_token):
         return Response(
             {"detail": "Refresh token invalid or missing."},
             status=status.HTTP_401_UNAUTHORIZED,

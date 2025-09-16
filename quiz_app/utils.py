@@ -282,7 +282,7 @@ def _get_empty_video_info():
 def validate_quiz_creation_data(serializer):
     """Validate request data for quiz creation."""
     if not serializer.is_valid():
-        return None, {"detail": "Invalid URL or request data."}
+        return None, serializer.errors
     return serializer.validated_data["url"], None
 
 
@@ -337,14 +337,12 @@ def handle_quiz_creation(user, url):
     """Handle the complete quiz creation process."""
     audio_file_path = None
     try:
-        return _create_quiz_with_cleanup(user, url)
+        video_info = get_video_info(url)
+        audio_file_path, transcript = process_video_transcription(url)
+        quiz_data = generate_quiz_from_transcript(transcript, video_info.get("title", ""))
+        return create_quiz_from_data(user, url, quiz_data, video_info)
     finally:
         cleanup_quiz_creation(audio_file_path)
 
 
-def _create_quiz_with_cleanup(user, url):
-    """Create quiz and handle cleanup."""
-    video_info = get_video_info(url)
-    audio_file_path, transcript = process_video_transcription(url)
-    quiz_data = generate_quiz_from_transcript(transcript, video_info.get("title", ""))
-    return create_quiz_from_data(user, url, quiz_data, video_info)
+

@@ -20,7 +20,7 @@ def custom_exception_handler(exc, context):
         # Customize authentication errors (401)
         if response.status_code == status.HTTP_401_UNAUTHORIZED:
             custom_response_data = {
-                'detail': 'Nicht authentifiziert.'
+                'detail': 'Authentication required.'
             }
             response.data = custom_response_data
         

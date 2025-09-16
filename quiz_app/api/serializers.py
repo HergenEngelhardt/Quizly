@@ -12,7 +12,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     """
     Serializer for quiz questions with full details.
 
-    Handles question data for API responses including timestamps.
+    Handles question data for API responses without timestamps per API specification.
     """
 
     class Meta:
@@ -22,10 +22,8 @@ class QuestionSerializer(serializers.ModelSerializer):
             "question_title",
             "question_options",
             "answer",
-            "created_at",
-            "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at"]
+        read_only_fields = ["id"]
 
 
 class QuestionListSerializer(serializers.ModelSerializer):

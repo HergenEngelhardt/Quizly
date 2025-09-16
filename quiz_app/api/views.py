@@ -110,7 +110,7 @@ class QuizDetailView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
-            return Response({"detail": "Invalid request data."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             return Response(
                 {"detail": "Internal server error."},
@@ -128,7 +128,7 @@ class QuizDetailView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(QuizSerializer(quiz).data, status=status.HTTP_200_OK)
-            return Response({"detail": "Invalid request data."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
             return Response(
                 {"detail": "Internal server error."},
