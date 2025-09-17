@@ -1,5 +1,6 @@
 """
 Quiz API views for Quizly application.
+Merged from views.py and views_clean.py to include all functionality.
 """
 
 from rest_framework import status
@@ -47,10 +48,16 @@ def create_quiz_view(request):
 def list_quizzes_view(request):
     """
     List all quizzes for the authenticated user.
+    Uses QuizListSerializer for optimized list view, with fallback to QuizSerializer.
     """
     try:
         quizzes = Quiz.objects.filter(user=request.user)
-        serializer = QuizListSerializer(quizzes, many=True)
+        # Primary: Use QuizListSerializer for optimized list display
+        try:
+            serializer = QuizListSerializer(quizzes, many=True)
+        except Exception:
+            # Fallback: Use QuizSerializer if QuizListSerializer fails
+            serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception:
         return Response(
@@ -69,6 +76,7 @@ class QuizDetailView(APIView):
     def get_user_quiz(self, id, user):
         """
         Get quiz if user owns it.
+        Returns quiz and error response (if any).
         """
         try:
             quiz = Quiz.objects.get(id=id)
@@ -149,3 +157,10 @@ class QuizDetailView(APIView):
                 {"detail": "Internal server error."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+# Merged functionality from views.py and views_clean.py
+# All features preserved including:
+# - QuizListSerializer support with QuizSerializer fallback
+# - Comprehensive error handling
+# - Detailed error messages for access control
