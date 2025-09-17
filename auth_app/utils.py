@@ -55,15 +55,13 @@ def clear_jwt_cookies(response):
     """Clear JWT cookies from response."""
     response.delete_cookie(
         "access_token",
-        domain=settings.SIMPLE_JWT.get("AUTH_COOKIE_DOMAIN"),
-        path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
-        samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
+        path="/",
+        samesite="Lax"
     )
     response.delete_cookie(
         "refresh_token",
-        domain=settings.SIMPLE_JWT.get("AUTH_COOKIE_DOMAIN"),
-        path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
-        samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"]
+        path="/",
+        samesite="Lax"
     )
     return response
 
@@ -125,6 +123,9 @@ def handle_user_logout(request):
             token.blacklist()
         except Exception:
             pass
+
+    from django.contrib.auth import logout
+    logout(request)
 
     response = Response(
         {
