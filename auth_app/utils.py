@@ -90,7 +90,6 @@ def handle_user_registration(serializer):
             {"detail": "User created successfully!"}, status=status.HTTP_201_CREATED
         )
     
-    # Return specific validation errors instead of generic message
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -119,13 +118,13 @@ def handle_user_login(serializer, request):
 
 def handle_user_logout(request):
     """Handle user logout logic."""
-    access_token = request.COOKIES.get("access_token")
     refresh_token = request.COOKIES.get("refresh_token")
-
-    if access_token:
-        blacklist_token(access_token)
     if refresh_token:
-        blacklist_token(refresh_token)
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except Exception:
+            pass
 
     response = Response(
         {
@@ -141,13 +140,6 @@ def handle_token_refresh(request):
     refresh_token = request.COOKIES.get("refresh_token")
 
     if not refresh_token:
-        return Response(
-            {"detail": "Refresh token invalid or missing."},
-            status=status.HTTP_401_UNAUTHORIZED,
-        )
-
-    # Check if refresh token is blacklisted
-    if is_token_blacklisted(refresh_token):
         return Response(
             {"detail": "Refresh token invalid or missing."},
             status=status.HTTP_401_UNAUTHORIZED,

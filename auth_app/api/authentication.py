@@ -39,9 +39,8 @@ class JWTCookieAuthentication(JWTAuthentication):
         if raw_token is None:
             return None
 
-        if is_token_blacklisted(raw_token):
-            return None
-
+        # Remove custom blacklist check for access tokens
+        # Let Django Simple JWT handle token validation
         try:
             validated_token = self.get_validated_token(raw_token)
             user = self.get_user(validated_token)
